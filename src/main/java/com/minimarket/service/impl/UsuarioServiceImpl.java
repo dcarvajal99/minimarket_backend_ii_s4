@@ -39,4 +39,38 @@ public class UsuarioServiceImpl implements UsuarioService {
     public void deleteById(Long id) {
         usuarioRepository.deleteById(id);
     }
+
+    @Override
+    public boolean datosCompletos(Usuario usuario) {
+        if (usuario == null) {
+            return false;
+        }
+        return tieneTexto(usuario.getNombre())
+                && tieneTexto(usuario.getApellido())
+                && tieneTexto(usuario.getEmail())
+                && tieneTexto(usuario.getDireccion());
+    }
+
+    @Override
+    public Usuario registrarUsuario(Usuario usuario) {
+        if (!datosCompletos(usuario)) {
+            throw new IllegalArgumentException(
+                    "Datos de usuario incompletos: nombre, apellido, email y direccion son obligatorios");
+        }
+        return usuarioRepository.save(usuario);
+    }
+
+    @Override
+    public boolean tieneRol(Usuario usuario, String nombreRol) {
+        if (usuario == null || usuario.getRoles() == null) {
+            return false;
+        }
+        return usuario.getRoles().stream()
+                .anyMatch(rol -> rol.getNombre().equals(nombreRol));
+    }
+
+    /** Verdadero si el texto no es null ni esta en blanco. */
+    private boolean tieneTexto(String valor) {
+        return valor != null && !valor.trim().isEmpty();
+    }
 }
